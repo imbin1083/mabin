@@ -1,0 +1,1040 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>K-POP 진화 시각화</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;700;900&family=Montserrat:wght@400;700;900&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+
+:root {
+  --bg: #f7f4ef;
+  --ink: #1a1612;
+  --ink2: #4a4540;
+  --ink3: #8a8480;
+  --g1: #b5451b;
+  --g2: #c9872a;
+  --g3: #1a6b8a;
+  --g4: #2d8a4e;
+  --paper: #fff9f2;
+  --rule: rgba(26,22,18,0.1);
+  --font-head: 'Montserrat', sans-serif;
+  --font-body: 'Noto Sans KR', sans-serif;
+}
+
+html { scroll-behavior: smooth; }
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-body);
+  line-height: 1.6;
+}
+
+/* ── MASTHEAD ── */
+.masthead {
+  background: var(--ink);
+  color: var(--bg);
+  padding: 3.5rem 4rem 3rem;
+  position: relative;
+  overflow: hidden;
+}
+.masthead::after {
+  content: 'K·P·O·P';
+  position: absolute;
+  right: -1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  font-family: var(--font-head);
+  font-weight: 900;
+  font-size: 11rem;
+  letter-spacing: -0.05em;
+  color: rgba(247,244,239,0.04);
+  pointer-events: none;
+  white-space: nowrap;
+}
+.masthead-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+.masthead-tag {
+  font-family: var(--font-head);
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: rgba(247,244,239,0.5);
+  border: 1px solid rgba(247,244,239,0.15);
+  padding: 0.35rem 0.8rem;
+  border-radius: 2px;
+}
+.masthead-h1 {
+  font-family: var(--font-head);
+  font-weight: 900;
+  font-size: clamp(2.8rem, 7vw, 5.5rem);
+  letter-spacing: -0.03em;
+  line-height: 1;
+}
+.masthead-h1 em {
+  font-style: normal;
+  -webkit-text-stroke: 1px rgba(247,244,239,0.4);
+  color: transparent;
+}
+.masthead-desc {
+  font-size: 0.95rem;
+  color: rgba(247,244,239,0.55);
+  max-width: 480px;
+  margin-top: 1rem;
+  line-height: 1.7;
+}
+.masthead-kpis {
+  display: flex;
+  gap: 3rem;
+  margin-top: 2.5rem;
+  padding-top: 2rem;
+  border-top: 1px solid rgba(247,244,239,0.12);
+  flex-wrap: wrap;
+}
+.kpi { }
+.kpi-val {
+  font-family: var(--font-head);
+  font-weight: 900;
+  font-size: 2.2rem;
+  line-height: 1;
+  letter-spacing: -0.02em;
+}
+.kpi-val.c1 { color: #e8704a; }
+.kpi-val.c2 { color: #e9a84e; }
+.kpi-val.c3 { color: #5aa8c8; }
+.kpi-val.c4 { color: #5aba7a; }
+.kpi-lbl {
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: rgba(247,244,239,0.4);
+  margin-top: 0.2rem;
+}
+
+/* ── LAYOUT ── */
+.page { max-width: 1200px; margin: 0 auto; padding: 4rem 2rem; }
+
+.section-head {
+  display: flex;
+  align-items: baseline;
+  gap: 1rem;
+  margin-bottom: 2.5rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 2px solid var(--ink);
+}
+.section-num {
+  font-family: var(--font-head);
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  color: var(--ink3);
+  text-transform: uppercase;
+}
+.section-title {
+  font-family: var(--font-head);
+  font-weight: 900;
+  font-size: 1.6rem;
+  letter-spacing: -0.02em;
+}
+
+.divider {
+  height: 1px;
+  background: var(--rule);
+  margin: 3rem 0;
+}
+
+/* ── GENERATION BANDS ── */
+.gen-bands {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0;
+  border: 2px solid var(--ink);
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 3rem;
+}
+.gen-band {
+  padding: 1.8rem 1.5rem;
+  position: relative;
+  cursor: default;
+  transition: transform 0.2s;
+}
+.gen-band:hover { transform: translateY(-3px); z-index: 1; }
+.gen-band:not(:last-child) { border-right: 2px solid var(--ink); }
+.gb-num {
+  font-family: var(--font-head);
+  font-weight: 900;
+  font-size: 3.5rem;
+  line-height: 1;
+  opacity: 0.15;
+  position: absolute;
+  right: 1rem;
+  top: 1rem;
+}
+.gb-era {
+  font-family: var(--font-head);
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  margin-bottom: 0.5rem;
+  opacity: 0.7;
+}
+.gb-title {
+  font-family: var(--font-head);
+  font-weight: 700;
+  font-size: 1rem;
+  margin-bottom: 0.75rem;
+  line-height: 1.3;
+}
+.gb-artists {
+  font-size: 0.78rem;
+  line-height: 1.6;
+  opacity: 0.75;
+}
+.gb-keyword {
+  display: inline-block;
+  font-family: var(--font-head);
+  font-size: 0.58rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 0.25rem 0.6rem;
+  border-radius: 2px;
+  margin-top: 0.9rem;
+}
+
+.gen-band:nth-child(1) { background: #fff0eb; }
+.gen-band:nth-child(1) .gb-keyword { background: var(--g1); color: #fff; }
+.gen-band:nth-child(2) { background: #fff8ec; }
+.gen-band:nth-child(2) .gb-keyword { background: var(--g2); color: #fff; }
+.gen-band:nth-child(3) { background: #eaf5fa; }
+.gen-band:nth-child(3) .gb-keyword { background: var(--g3); color: #fff; }
+.gen-band:nth-child(4) { background: #eaf7ee; }
+.gen-band:nth-child(4) .gb-keyword { background: var(--g4); color: #fff; }
+
+@media (max-width: 700px) {
+  .gen-bands { grid-template-columns: 1fr 1fr; }
+  .gen-band:nth-child(2) { border-right: none; }
+  .gen-band:nth-child(3) { border-top: 2px solid var(--ink); }
+}
+
+/* ── CHARTS GRID ── */
+.charts-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+}
+@media (max-width: 750px) { .charts-grid { grid-template-columns: 1fr; } }
+
+.chart-box {
+  background: var(--paper);
+  border: 1px solid rgba(26,22,18,0.12);
+  border-radius: 4px;
+  padding: 1.8rem;
+}
+.chart-box.wide { grid-column: 1 / -1; }
+.chart-label {
+  font-family: var(--font-head);
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ink3);
+  margin-bottom: 0.4rem;
+}
+.chart-title {
+  font-family: var(--font-head);
+  font-weight: 700;
+  font-size: 1rem;
+  margin-bottom: 1.5rem;
+  line-height: 1.3;
+}
+.chart-wrap { position: relative; }
+.chart-wrap canvas { display: block; }
+
+/* ── GROWTH BAR ── */
+.growth-bars { display: flex; flex-direction: column; gap: 1rem; }
+.gb-row { display: flex; align-items: center; gap: 1rem; }
+.gb-year {
+  font-family: var(--font-head);
+  font-size: 0.7rem;
+  font-weight: 700;
+  width: 2.4rem;
+  flex-shrink: 0;
+  color: var(--ink2);
+}
+.gb-bar-track {
+  flex: 1;
+  height: 22px;
+  background: rgba(26,22,18,0.06);
+  border-radius: 2px;
+  overflow: hidden;
+  position: relative;
+}
+.gb-bar-fill {
+  height: 100%;
+  border-radius: 2px;
+  width: 0;
+  transition: width 1.3s cubic-bezier(0.16,1,0.3,1);
+  display: flex;
+  align-items: center;
+  padding-right: 0.5rem;
+  justify-content: flex-end;
+}
+.gb-bar-val {
+  font-family: var(--font-head);
+  font-size: 0.62rem;
+  font-weight: 700;
+  color: #fff;
+  white-space: nowrap;
+}
+.gb-artist {
+  font-size: 0.72rem;
+  width: 5rem;
+  flex-shrink: 0;
+  color: var(--ink2);
+  text-align: right;
+}
+
+/* ── RADAR / SPIDER ── */
+.radar-note {
+  font-size: 0.78rem;
+  color: var(--ink3);
+  margin-top: 1rem;
+  line-height: 1.6;
+}
+
+/* ── BUBBLE CHART custom ── */
+.bubble-area {
+  position: relative;
+  height: 320px;
+  background: rgba(26,22,18,0.02);
+  border: 1px solid var(--rule);
+  border-radius: 4px;
+  overflow: hidden;
+}
+.bubble {
+  position: absolute;
+  border-radius: 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  cursor: default;
+  transition: transform 0.2s, box-shadow 0.2s;
+  padding: 0.5rem;
+  animation: float 6s ease-in-out infinite;
+}
+.bubble:hover {
+  transform: scale(1.07);
+  box-shadow: 0 8px 30px rgba(0,0,0,0.15);
+  z-index: 10;
+}
+.bubble-name {
+  font-family: var(--font-head);
+  font-weight: 700;
+  color: #fff;
+  line-height: 1.2;
+}
+.bubble-sub {
+  font-size: 0.62rem;
+  color: rgba(255,255,255,0.8);
+  margin-top: 0.2rem;
+}
+@keyframes float {
+  0%,100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+.bubble:hover { animation-play-state: paused; }
+
+/* ── PLATFORM TIMELINE ── */
+.platform-row {
+  display: flex;
+  align-items: stretch;
+  gap: 0;
+  margin-bottom: 0.5rem;
+}
+.pt-label {
+  width: 80px;
+  flex-shrink: 0;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--ink2);
+  padding: 0.6rem 0.75rem 0.6rem 0;
+  display: flex;
+  align-items: center;
+  text-align: right;
+  justify-content: flex-end;
+  border-right: 2px solid var(--rule);
+}
+.pt-track {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  padding: 0 0.5rem;
+  position: relative;
+}
+.pt-block {
+  position: absolute;
+  height: 26px;
+  border-radius: 3px;
+  display: flex;
+  align-items: center;
+  padding: 0 0.6rem;
+  font-family: var(--font-head);
+  font-size: 0.6rem;
+  font-weight: 700;
+  color: #fff;
+  white-space: nowrap;
+  overflow: hidden;
+  transition: opacity 0.2s;
+}
+.pt-block:hover { opacity: 0.85; }
+.pt-axis {
+  display: flex;
+  margin-left: 80px;
+  border-top: 1px solid var(--rule);
+  padding-top: 0.3rem;
+}
+.pt-axis-tick {
+  font-family: var(--font-head);
+  font-size: 0.58rem;
+  color: var(--ink3);
+  flex: 1;
+  text-align: center;
+}
+
+/* ── HEATMAP ── */
+.heatmap-grid {
+  display: grid;
+  grid-template-columns: 80px repeat(5, 1fr);
+  gap: 3px;
+}
+.hm-cell {
+  height: 38px;
+  border-radius: 3px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-head);
+  font-size: 0.62rem;
+  font-weight: 700;
+  transition: transform 0.15s;
+  cursor: default;
+}
+.hm-cell:hover { transform: scale(1.05); z-index: 1; }
+.hm-header {
+  background: transparent;
+  font-size: 0.6rem;
+  color: var(--ink3);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.hm-row-label {
+  background: transparent;
+  font-size: 0.7rem;
+  color: var(--ink2);
+  justify-content: flex-end;
+  padding-right: 0.75rem;
+}
+
+/* ── FUNNEL ── */
+.funnel { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.funnel-step {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  width: 100%;
+  justify-content: center;
+}
+.funnel-bar {
+  height: 42px;
+  border-radius: 3px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: width 1.2s cubic-bezier(0.16,1,0.3,1);
+}
+.funnel-label {
+  font-family: var(--font-head);
+  font-size: 0.62rem;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: 0.05em;
+}
+.funnel-meta {
+  font-size: 0.7rem;
+  color: var(--ink3);
+  width: 5.5rem;
+  flex-shrink: 0;
+}
+
+/* ── LEGEND ── */
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.72rem;
+  color: var(--ink2);
+}
+.legend-dot {
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.legend-sq {
+  width: 12px; height: 12px;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+/* ── FOOTER ── */
+footer {
+  background: var(--ink);
+  color: rgba(247,244,239,0.35);
+  text-align: center;
+  padding: 2rem;
+  font-size: 0.65rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+/* reveal */
+.reveal { opacity:0; transform:translateY(18px); transition: opacity 0.7s, transform 0.7s; }
+.reveal.in { opacity:1; transform:none; }
+</style>
+</head>
+<body>
+
+<!-- MASTHEAD -->
+<div class="masthead">
+  <div class="masthead-top">
+    <span class="masthead-tag">데이터 시각화 보고서</span>
+    <span class="masthead-tag">1992 — 2025</span>
+  </div>
+  <h1 class="masthead-h1">K-POP<br><em>진화의</em> 기록</h1>
+  <p class="masthead-desc">4개 세대, 30년의 데이터로 읽는 한국 대중음악의 글로벌 혁명.</p>
+  <div class="masthead-kpis">
+    <div class="kpi"><div class="kpi-val c1">4세대</div><div class="kpi-lbl">진화 단계</div></div>
+    <div class="kpi"><div class="kpi-val c2">93M+</div><div class="kpi-lbl">최대 YT 구독자</div></div>
+    <div class="kpi"><div class="kpi-val c3">$12B</div><div class="kpi-lbl">연간 경제효과</div></div>
+    <div class="kpi"><div class="kpi-val c4">100+</div><div class="kpi-lbl">팬덤 국가</div></div>
+  </div>
+</div>
+
+<div class="page">
+
+  <!-- ── 01 세대 밴드 ── -->
+  <div class="section-head reveal">
+    <span class="section-num">01</span>
+    <span class="section-title">세대별 특징 한눈에 보기</span>
+  </div>
+
+  <div class="gen-bands reveal">
+    <div class="gen-band">
+      <div class="gb-num">1</div>
+      <div class="gb-era">1992 — 2001</div>
+      <div class="gb-title">아이돌 시스템<br>탄생</div>
+      <div class="gb-artists">서태지와 아이들<br>H.O.T · S.E.S<br>젝스키스 · 핑클</div>
+      <div class="gb-keyword">국내 기반</div>
+    </div>
+    <div class="gen-band">
+      <div class="gb-num">2</div>
+      <div class="gb-era">2002 — 2011</div>
+      <div class="gb-title">아시아<br>한류 확산</div>
+      <div class="gb-artists">동방신기 · 빅뱅<br>소녀시대<br>원더걸스 · 2NE1</div>
+      <div class="gb-keyword">아시아 한류</div>
+    </div>
+    <div class="gen-band">
+      <div class="gb-num">3</div>
+      <div class="gb-era">2012 — 2019</div>
+      <div class="gb-title">글로벌<br>K-POP 시대</div>
+      <div class="gb-artists">BTS · BLACKPINK<br>EXO · TWICE<br>PSY · GOT7</div>
+      <div class="gb-keyword">글로벌 진출</div>
+    </div>
+    <div class="gen-band">
+      <div class="gb-num">4</div>
+      <div class="gb-era">2020 — 현재</div>
+      <div class="gb-title">메타버스·AI<br>탈장르화</div>
+      <div class="gb-artists">aespa · NewJeans<br>르세라핌 · 아이브<br>STRAY KIDS</div>
+      <div class="gb-keyword">메타버스</div>
+    </div>
+  </div>
+
+  <!-- ── 02 앨범 판매량 & 해외팬 ── -->
+  <div class="section-head reveal">
+    <span class="section-num">02</span>
+    <span class="section-title">성장 데이터</span>
+  </div>
+
+  <div class="charts-grid reveal">
+
+    <!-- 앨범 판매량 라인 -->
+    <div class="chart-box">
+      <div class="chart-label">연도별 추이</div>
+      <div class="chart-title">K-POP 앨범 총 판매량 (백만 장)</div>
+      <div class="chart-wrap" style="height:220px">
+        <canvas id="lineChart"></canvas>
+      </div>
+    </div>
+
+    <!-- 해외 팬 비중 파이 -->
+    <div class="chart-box">
+      <div class="chart-label">세대별 해외 팬 비중</div>
+      <div class="chart-title">해외 팬덤 성장률 (%)</div>
+      <div class="chart-wrap" style="height:220px">
+        <canvas id="donutChart"></canvas>
+      </div>
+    </div>
+
+    <!-- 유튜브 구독자 수평 바 -->
+    <div class="chart-box wide">
+      <div class="chart-label">2024년 기준</div>
+      <div class="chart-title">주요 아티스트 유튜브 채널 구독자 (백만 명)</div>
+      <div class="growth-bars" id="growthBars"></div>
+    </div>
+
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- ── 03 빌보드 & 역량 레이더 ── -->
+  <div class="section-head reveal">
+    <span class="section-num">03</span>
+    <span class="section-title">글로벌 성과 & 역량 분석</span>
+  </div>
+
+  <div class="charts-grid reveal">
+
+    <!-- 빌보드 Hot100 바 -->
+    <div class="chart-box">
+      <div class="chart-label">빌보드 Hot 100</div>
+      <div class="chart-title">역대 최고 순위 (1위에 가까울수록 높은 성과)</div>
+      <div class="chart-wrap" style="height:240px">
+        <canvas id="billboardChart"></canvas>
+      </div>
+    </div>
+
+    <!-- 세대별 역량 레이더 -->
+    <div class="chart-box">
+      <div class="chart-label">세대 비교</div>
+      <div class="chart-title">세대별 핵심 역량 레이더</div>
+      <div class="chart-wrap" style="height:240px">
+        <canvas id="radarChart"></canvas>
+      </div>
+      <p class="radar-note">※ 10점 척도. 각 역량은 음악성·안무·비주얼·팬덤·글로벌 파급력 기준 추정치.</p>
+    </div>
+
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- ── 04 플랫폼 타임라인 ── -->
+  <div class="section-head reveal">
+    <span class="section-num">04</span>
+    <span class="section-title">플랫폼 진화 타임라인</span>
+  </div>
+
+  <div class="chart-box reveal">
+    <div class="chart-label">미디어 플랫폼</div>
+    <div class="chart-title">K-POP 소비 플랫폼의 변화 (1992–2025)</div>
+    <div id="platformTimeline" style="margin-top:1.5rem"></div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- ── 05 아티스트 버블 ── -->
+  <div class="section-head reveal">
+    <span class="section-num">05</span>
+    <span class="section-title">아티스트 인지도 버블 맵</span>
+  </div>
+
+  <div class="chart-box reveal" style="padding-bottom:1.2rem">
+    <div class="chart-label">버블 크기 = 글로벌 인지도</div>
+    <div class="chart-title">주요 아티스트 포지셔닝 (데뷔 연도 × 글로벌 영향력)</div>
+    <div class="bubble-area" id="bubbleArea"></div>
+    <div class="legend" id="bubbleLegend"></div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- ── 06 히트맵 ── -->
+  <div class="section-head reveal">
+    <span class="section-num">06</span>
+    <span class="section-title">지역별 K-POP 인기도 히트맵</span>
+  </div>
+
+  <div class="chart-box reveal">
+    <div class="chart-label">10점 척도</div>
+    <div class="chart-title">세대별 × 지역별 팬덤 강도</div>
+    <div class="heatmap-grid" id="heatmap" style="margin-top:1.5rem"></div>
+    <div class="legend" style="margin-top:1.2rem">
+      <div class="legend-item"><div class="legend-sq" style="background:#fee8e0"></div>매우 약함</div>
+      <div class="legend-item"><div class="legend-sq" style="background:#f9c4aa"></div>약함</div>
+      <div class="legend-item"><div class="legend-sq" style="background:#e8895e"></div>보통</div>
+      <div class="legend-item"><div class="legend-sq" style="background:#c94e1a"></div>강함</div>
+      <div class="legend-item"><div class="legend-sq" style="background:#7d2100"></div>매우 강함</div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- ── 07 기획사 점유율 ── -->
+  <div class="section-head reveal">
+    <span class="section-num">07</span>
+    <span class="section-title">기획사별 시장 점유율 변화</span>
+  </div>
+
+  <div class="chart-box reveal">
+    <div class="chart-label">누적 100% 기준</div>
+    <div class="chart-title">세대별 빅4 기획사 음반 시장 점유율</div>
+    <div class="chart-wrap" style="height:260px">
+      <canvas id="stackedChart"></canvas>
+    </div>
+  </div>
+
+</div><!-- /page -->
+
+<footer>K-POP 진화 시각화 보고서 · 2025 · 모든 수치는 공개 자료 기반 추정치</footer>
+
+<script>
+// ══════════════════════════════════════════════
+// CHART.JS DEFAULTS
+// ══════════════════════════════════════════════
+Chart.defaults.font.family = "'Noto Sans KR', sans-serif";
+Chart.defaults.color = '#4a4540';
+Chart.defaults.plugins.legend.labels.usePointStyle = true;
+Chart.defaults.plugins.legend.labels.pointStyleWidth = 8;
+Chart.defaults.plugins.legend.labels.padding = 16;
+
+const C1 = '#b5451b', C2 = '#c9872a', C3 = '#1a6b8a', C4 = '#2d8a4e';
+
+// ── LINE CHART ──
+new Chart(document.getElementById('lineChart'), {
+  type: 'line',
+  data: {
+    labels: ['2005','2008','2012','2015','2017','2019','2021','2023','2025'],
+    datasets: [{
+      label: '앨범 판매량 (백만)',
+      data: [3, 6, 14, 22, 36, 55, 72, 95, 110],
+      borderColor: C3,
+      backgroundColor: 'rgba(26,107,138,0.08)',
+      fill: true,
+      tension: 0.45,
+      pointBackgroundColor: C3,
+      pointRadius: 4,
+      pointHoverRadius: 6,
+      borderWidth: 2,
+    }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { display: false } },
+    scales: {
+      x: { grid: { color: 'rgba(26,22,18,0.06)' }, ticks: { font: { size: 10 } } },
+      y: { grid: { color: 'rgba(26,22,18,0.06)' }, ticks: { font: { size: 10 } }, beginAtZero: true }
+    }
+  }
+});
+
+// ── DONUT ──
+new Chart(document.getElementById('donutChart'), {
+  type: 'doughnut',
+  data: {
+    labels: ['1세대 (5%)', '2세대 (25%)', '3세대 (62%)', '4세대 (78%)'],
+    datasets: [{
+      data: [5, 25, 62, 78],
+      backgroundColor: [C1, C2, C3, C4],
+      borderColor: '#fff9f2',
+      borderWidth: 3,
+      hoverOffset: 6,
+    }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    cutout: '62%',
+    plugins: {
+      legend: { position: 'right', labels: { font: { size: 11 } } }
+    }
+  }
+});
+
+// ── GROWTH BARS (custom) ──
+const ytData = [
+  { name: 'BLACKPINK', val: 93.1, color: C1 },
+  { name: 'BTS',       val: 77.5, color: '#6253b0' },
+  { name: 'PSY',       val: 25.3, color: C2 },
+  { name: 'TWICE',     val: 14.8, color: '#e86b8a' },
+  { name: 'EXO',       val: 12.6, color: C3 },
+  { name: 'aespa',     val: 10.4, color: C4 },
+  { name: 'NewJeans',  val:  8.2, color: '#7a9ec4' },
+];
+const maxYT = Math.max(...ytData.map(d => d.val));
+const gbWrap = document.getElementById('growthBars');
+ytData.forEach(d => {
+  const pct = (d.val / maxYT) * 100;
+  const row = document.createElement('div');
+  row.className = 'gb-row';
+  row.innerHTML = `
+    <div class="gb-artist">${d.name}</div>
+    <div class="gb-bar-track">
+      <div class="gb-bar-fill" data-w="${pct}%" style="background:${d.color}">
+        <span class="gb-bar-val">${d.val}M</span>
+      </div>
+    </div>`;
+  gbWrap.appendChild(row);
+});
+
+// ── BILLBOARD ──
+new Chart(document.getElementById('billboardChart'), {
+  type: 'bar',
+  data: {
+    labels: ['BTS\nDynamite', 'BTS\nButter', 'BLACKPINK\nShut Down', 'TWICE\nTT', 'PSY\nGangnam'],
+    datasets: [{
+      label: '최고 순위 역수 (100−순위)',
+      data: [100, 100, 79, 63, 36],
+      backgroundColor: [C1, C1, '#e86b8a', C2, C3],
+      borderRadius: 3,
+      borderSkipped: false,
+    }]
+  },
+  options: {
+    indexAxis: 'y',
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { display: false },
+      tooltip: {
+        callbacks: {
+          label: ctx => `Hot 100 최고 순위: ${100 - ctx.parsed.x}위`
+        }
+      }
+    },
+    scales: {
+      x: { grid: { color: 'rgba(26,22,18,0.06)' }, max: 105,
+        ticks: { font: { size: 10 }, callback: v => v === 100 ? '1위' : v === 0 ? '' : `${100-v}위` } },
+      y: { grid: { display: false }, ticks: { font: { size: 10 } } }
+    }
+  }
+});
+
+// ── RADAR ──
+new Chart(document.getElementById('radarChart'), {
+  type: 'radar',
+  data: {
+    labels: ['음악성', '안무', '비주얼', '팬덤 결속력', '글로벌 파급력'],
+    datasets: [
+      { label: '1세대', data: [7,8,7,9,3],  borderColor: C1, backgroundColor: `${C1}18`, pointBackgroundColor: C1 },
+      { label: '2세대', data: [8,9,8,9,6],  borderColor: C2, backgroundColor: `${C2}18`, pointBackgroundColor: C2 },
+      { label: '3세대', data: [9,9,9,10,10], borderColor: C3, backgroundColor: `${C3}18`, pointBackgroundColor: C3 },
+      { label: '4세대', data: [8,10,10,9,9], borderColor: C4, backgroundColor: `${C4}18`, pointBackgroundColor: C4 },
+    ]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { position: 'bottom', labels: { font: { size: 10 } } } },
+    scales: {
+      r: {
+        min: 0, max: 10,
+        ticks: { stepSize: 2, font: { size: 9 }, backdropColor: 'transparent' },
+        grid: { color: 'rgba(26,22,18,0.1)' },
+        pointLabels: { font: { size: 10, weight: '700' } }
+      }
+    }
+  }
+});
+
+// ── PLATFORM TIMELINE ──
+const platforms = [
+  { name: 'TV 방송', color: C1,   start: 0,  end: 100 },
+  { name: 'CD/음반', color: C2,   start: 0,  end: 72  },
+  { name: '음원 사이트', color: '#9b6a1a', start: 36, end: 100 },
+  { name: 'YouTube', color: C3,   start: 45, end: 100 },
+  { name: 'SNS/트위터', color: '#2d7a8a', start: 50, end: 100 },
+  { name: 'TikTok',   color: C4,  start: 72, end: 100 },
+];
+const years = ['1992','1997','2002','2007','2012','2017','2022','2025'];
+const ptEl = document.getElementById('platformTimeline');
+
+platforms.forEach(p => {
+  const row = document.createElement('div');
+  row.className = 'platform-row';
+  row.innerHTML = `<div class="pt-label">${p.name}</div><div class="pt-track" id="pt_${p.name.replace(/\//g,'_')}"></div>`;
+  ptEl.appendChild(row);
+});
+
+// Axis
+const axisRow = document.createElement('div');
+axisRow.className = 'pt-axis';
+years.forEach(y => { axisRow.innerHTML += `<div class="pt-axis-tick">${y}</div>`; });
+ptEl.appendChild(axisRow);
+
+// Draw blocks after paint
+requestAnimationFrame(() => {
+  platforms.forEach(p => {
+    const track = document.getElementById(`pt_${p.name.replace(/\//g,'_')}`);
+    if (!track) return;
+    const w = track.offsetWidth;
+    const block = document.createElement('div');
+    block.className = 'pt-block';
+    block.style.background = p.color;
+    block.style.left = (p.start / 100 * w) + 'px';
+    block.style.width = ((p.end - p.start) / 100 * w) + 'px';
+    block.textContent = p.name;
+    track.appendChild(block);
+  });
+});
+
+// ── BUBBLE MAP ──
+const bubbles = [
+  { name: 'H.O.T',      gen: 1, year: 1996, size: 55,  color: C1 },
+  { name: '동방신기',    gen: 2, year: 2003, size: 70,  color: C2 },
+  { name: '빅뱅',       gen: 2, year: 2006, size: 82,  color: C2 },
+  { name: '소녀시대',   gen: 2, year: 2007, size: 75,  color: C2 },
+  { name: 'PSY',        gen: 3, year: 2012, size: 90,  color: '#888' },
+  { name: 'EXO',        gen: 3, year: 2012, size: 80,  color: C3 },
+  { name: 'BTS',        gen: 3, year: 2013, size: 130, color: '#4a3b9c' },
+  { name: 'TWICE',      gen: 3, year: 2015, size: 78,  color: '#d4507a' },
+  { name: 'BLACKPINK',  gen: 3, year: 2016, size: 115, color: C1 },
+  { name: 'aespa',      gen: 4, year: 2020, size: 72,  color: C4 },
+  { name: 'NewJeans',   gen: 4, year: 2022, size: 76,  color: '#4a88b8' },
+  { name: '르세라핌',   gen: 4, year: 2022, size: 65,  color: '#5a8a3e' },
+];
+
+const ba = document.getElementById('bubbleArea');
+const minY = 1992, maxY = 2025;
+const positions = [
+  [8, 55], [20, 25], [28, 65], [35, 38],
+  [45, 20], [52, 60], [55, 35], [62, 72],
+  [68, 45], [78, 20], [82, 55], [88, 38],
+];
+
+bubbles.forEach((b, i) => {
+  const [lPct, tPct] = positions[i];
+  const s = b.size;
+  const div = document.createElement('div');
+  div.className = 'bubble';
+  div.style.cssText = `
+    width:${s}px; height:${s}px;
+    left:${lPct}%; top:${tPct}%;
+    transform:translate(-50%,-50%);
+    background:${b.color};
+    animation-delay:${i * 0.4}s;
+  `;
+  const fs = Math.max(8, Math.min(12, s * 0.13));
+  div.innerHTML = `<span class="bubble-name" style="font-size:${fs}px">${b.name}</span><span class="bubble-sub">${b.year}</span>`;
+  ba.appendChild(div);
+});
+
+// Legend for bubbles
+const bl = document.getElementById('bubbleLegend');
+[[C1,'1세대'],[C2,'2세대'],[C3,'3세대'],[C4,'4세대']].forEach(([c, l]) => {
+  bl.innerHTML += `<div class="legend-item"><div class="legend-dot" style="background:${c}"></div>${l}</div>`;
+});
+
+// ── HEATMAP ──
+const hmData = {
+  headers: ['', '한국', '일본', '동남아', '미주·유럽', '중국'],
+  rows: [
+    { label: '1세대', vals: [9, 5, 4, 1, 3] },
+    { label: '2세대', vals: [9, 9, 8, 3, 7] },
+    { label: '3세대', vals: [9, 8, 9, 9, 8] },
+    { label: '4세대', vals: [9, 7, 9, 8, 7] },
+  ]
+};
+const hmEl = document.getElementById('heatmap');
+const heatColors = ['#fee8e0','#f9c4aa','#e8895e','#c94e1a','#7d2100'];
+function heatColor(v) {
+  if (v <= 2) return heatColors[0];
+  if (v <= 4) return heatColors[1];
+  if (v <= 6) return heatColors[2];
+  if (v <= 8) return heatColors[3];
+  return heatColors[4];
+}
+function textColor(v) { return v >= 7 ? '#fff' : '#4a4540'; }
+
+hmData.headers.forEach(h => {
+  const cell = document.createElement('div');
+  cell.className = 'hm-cell hm-header';
+  cell.textContent = h;
+  hmEl.appendChild(cell);
+});
+hmData.rows.forEach(row => {
+  const lc = document.createElement('div');
+  lc.className = 'hm-cell hm-row-label';
+  lc.textContent = row.label;
+  hmEl.appendChild(lc);
+  row.vals.forEach(v => {
+    const c = document.createElement('div');
+    c.className = 'hm-cell';
+    c.style.background = heatColor(v);
+    c.style.color = textColor(v);
+    c.textContent = v;
+    c.title = `강도: ${v}/10`;
+    hmEl.appendChild(c);
+  });
+});
+
+// ── STACKED BAR ──
+new Chart(document.getElementById('stackedChart'), {
+  type: 'bar',
+  data: {
+    labels: ['1세대\n~2001', '2세대\n~2011', '3세대\n~2019', '4세대\n2024'],
+    datasets: [
+      { label: 'SM엔터',  data: [42, 35, 28, 22], backgroundColor: '#e85c3a', borderRadius: 0 },
+      { label: 'YG엔터',  data: [20, 28, 25, 18], backgroundColor: '#d4a020', borderRadius: 0 },
+      { label: 'JYP엔터', data: [18, 15, 22, 20], backgroundColor: '#2a7a9a', borderRadius: 0 },
+      { label: 'HYBE',   data: [0,   5, 15, 28], backgroundColor: '#3a9a58', borderRadius: 0 },
+      { label: '기타',    data: [20, 17, 10, 12], backgroundColor: 'rgba(26,22,18,0.15)', borderRadius: 0 },
+    ]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { position: 'bottom', labels: { font: { size: 11 } } } },
+    scales: {
+      x: { stacked: true, grid: { display: false }, ticks: { font: { size: 10 } } },
+      y: { stacked: true, grid: { color: 'rgba(26,22,18,0.06)' },
+        max: 100, ticks: { font: { size: 10 }, callback: v => v + '%' } }
+    }
+  }
+});
+
+// ══════════════════════════════════════════════
+// ANIMATIONS
+// ══════════════════════════════════════════════
+
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      e.target.classList.add('in');
+      // animate growth bars when visible
+      if (e.target.classList.contains('in')) {
+        e.target.querySelectorAll('.gb-bar-fill[data-w]').forEach(b => {
+          b.style.width = b.dataset.w;
+        });
+      }
+      observer.unobserve(e.target);
+    }
+  });
+}, { threshold: 0.15 });
+
+document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+</script>
+</body>
+</html>
